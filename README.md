@@ -52,6 +52,10 @@ For RTX 40 Series (Ada Lovelace):
 nvcc -o hpr_result main.cu -O3 -arch=sm_89
 ```
 ### 4) Run
+Make a output folder:
+```bash
+mkdir -p output
+```
 Loot:
 ```bash
 ./hpr_result /your_path/loot/loot/Ply/loot_vox10_
