@@ -17,7 +17,7 @@ The core components include:
 This project uses the **8i Voxelized Full Bodies (MPEG)** dataset (e.g., *Loot*, *LongDress*).
 
 - Loot: https://drive.google.com/drive/folders/1fbDX3Je0em2fG4_hTaq08lZ6nx-5Y868?usp=drive_link  
-- LongDress: <PUT_YOUR_LONGDRESS_LINK_HERE>
+- LongDress: https://drive.google.com/drive/folders/117AKgjtffmNUeM9t20B5HeFBjnd7OMl3?usp=drive_link
 
 ### Expected file naming (important)
 The current implementation expects a **PLY file prefix** like:
