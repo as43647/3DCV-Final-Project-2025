@@ -28,7 +28,7 @@ Your frames should follow a pattern similar to:
 - `loot_vox10_0000.ply`, `loot_vox10_0001.ply`, ...
 - `longdress_vox10_0000.ply`, `longdress_vox10_0001.ply`, ...
 
-If your dataset naming differs, update the filename parsing/loading logic in `test_hpr.cu`.
+If your dataset naming differs, update the filename parsing/loading logic in `main.cu`.
 
 ## Prerequisites & Installation
 No external libraries are required. Only the **CUDA Toolkit** and standard build tools.
