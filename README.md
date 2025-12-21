@@ -56,11 +56,11 @@ Make a output folder:
 ```bash
 mkdir -p output
 ```
-Loot:
+Loot (change startFrame = 1000):
 ```bash
 ./hpr_result /your_path/loot/loot/Ply/loot_vox10_
 ```
-LongDress:
+LongDress (change startFrame = 1051):
 ```bash
 ./hpr_result /your_path/longdress/longdress/Ply/longdress_vox10_
 ```
