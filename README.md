@@ -64,3 +64,5 @@ LongDress (change startFrame = 1051):
 ```bash
 ./hpr_result /your_path/longdress/longdress/Ply/longdress_vox10_
 ```
+
+Using Gemini 3.0 for code adjustment and debug. Using ChatGPT 5.2 for report correction.
