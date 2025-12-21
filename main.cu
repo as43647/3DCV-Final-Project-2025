@@ -10,13 +10,13 @@
 #include <set>
 
 
-// === 1. 定義資料結構 ===
+// 定義資料結構
 struct Point {
   float x = 0.0f, y = 0.0f, z = 0.0f;
   int r = 255, g = 255, b = 255;
   float point_size = 0.0f;
   int count = 0;
-  int id = -1; // 用於追蹤頻寬的 ID
+  int id = -1; // 追蹤頻寬的ID
 };
 
 struct Point_rgb {
@@ -35,7 +35,7 @@ struct Vector3d {
   float x, y, z;
 };
 
-// === 2. 輔助數學函式 ===
+// 數學函式
 __host__ __device__ void normalizeVector(Vector3d &v) {
     float magnitude = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
     if (magnitude != 0) {
@@ -50,7 +50,7 @@ __host__ __device__ void crossProduct(Vector3d A, Vector3d B, Vector3d &C) {
    normalizeVector(C);
 }
 
-// === 3. CUDA Kernels ===
+// CUDA Kernels
 __device__ void atomicMinn(float *const addr, const float val) {
   if (*addr <= val) return;
   unsigned int *const addr_as_ui = (unsigned int *)addr;
@@ -81,7 +81,7 @@ __global__ void logPolarTransformKernel(Point* points, int numPoints, float radi
     float rel_y = point.y - gaze.position.y;
     float rel_z = point.z - gaze.position.z;
 
-    // 投影到 Gaze 方向的深度 (d)
+    // 投影到Gaze方向的深度(d)
     float d = rel_x * gaze.direction.x + rel_y * gaze.direction.y + rel_z * gaze.direction.z;
     if (d <= 0.001f) return; 
 
@@ -98,7 +98,7 @@ __global__ void logPolarTransformKernel(Point* points, int numPoints, float radi
     float theta = atan2(local_y, local_x);
     float radius = max(sqrt(local_x*local_x + local_y*local_y), radius_min);
 
-    // 計算 Log-Polar 索引
+    // 計算Log-Polar索引
     float log_r = log(radius/radius_min);
     float base = (theta_bins + M_PI) / (theta_bins - M_PI);
     
@@ -110,16 +110,16 @@ __global__ void logPolarTransformKernel(Point* points, int numPoints, float radi
 
     int buf_idx = r_index * theta_bins * phi_bins + theta_index * phi_bins + phi_index;
 
-    // 原子操作更新最小深度
+    // 更新最小深度
     atomicMinn(&logPolarBuffer[buf_idx].depth_val, d);
     
-    // 更新顏色與 ID (稍微放寬判定以避免競爭條件下的閃爍)
+    // 更新顏色與ID
     if (d <= logPolarBuffer[buf_idx].depth_val + 0.002f){
         logPolarBuffer[buf_idx].r = point.r;
         logPolarBuffer[buf_idx].g = point.g;
         logPolarBuffer[buf_idx].b = point.b;
         logPolarBuffer[buf_idx].count = 1;
-        logPolarBuffer[buf_idx].id = point.id; // 儲存 ID
+        logPolarBuffer[buf_idx].id = point.id; // 儲存ID
     }
 }
 
@@ -161,7 +161,7 @@ __global__ void logPolarToCartesianKernel(Point_rgb* logPolarBuffer, int r_bins,
     points[idx].count = 1;
 }
 
-// === 4. Host 端 I/O 與前處理 ===
+// Host端I/O與前處理
 
 std::vector<Point> loadPLY(const char* filename) {
     std::vector<Point> points;
@@ -189,12 +189,12 @@ std::vector<Point> loadPLY(const char* filename) {
     for (int i = 0; i < numPoints; i++) {
         if (!fgets(line, 1024, file)) break;
         int r=255, g=255, b=255;
-        // 嘗試讀取 6 個值，如果失敗則給預設顏色
+        // 嘗試讀取6個值，如果失敗則給預設顏色
         int parsed = sscanf(line, "%f %f %f %d %d %d", &points[i].x, &points[i].y, &points[i].z, &r, &g, &b);
         if (parsed < 6) { r=200; g=200; b=200; }
         
         points[i].r = r; points[i].g = g; points[i].b = b;
-        points[i].id = i; // 設定原始 ID
+        points[i].id = i; // 設定原始ID
 
         sum_x += points[i].x;
         sum_y += points[i].y;
@@ -249,23 +249,16 @@ void savePLY(const char* filename, const std::vector<Point>& points) {
     file.close();
 }
 
-// ... 前面的 struct 和 kernel 都一樣，不需要動 ...
-
 int main(int argc, char** argv) {
-    // 預設前綴 (如果沒有輸入參數，就用這個)
     const char* defaultPrefix = "loot_vox10_"; 
     const char* filePrefix = defaultPrefix;
 
-    // 如果使用者有輸入參數 (例如 ./test_hpr data/loot_vox10_)
     if (argc > 1) {
         filePrefix = argv[1];
     }
 
     int startFrame = 1000;      // 起始幀號
     int total_frames = 300;      // 要跑幾幀
-    
-    // === GPU 記憶體預先配置 (Allocate Max Size) ===
-    // Loot 資料集最多大約 80~100 萬點，我們配置大一點比較保險
     int max_capacity = 2000000; 
     
     Point* d_points;
@@ -275,7 +268,7 @@ int main(int argc, char** argv) {
     float rate_adapt = 1.8f;
     // int r_bins = 600; int theta_bins = 450; int phi_bins = 1; // 稍微降低解析度以減少透視
     int r_bins = 1200; int theta_bins = 1500; int phi_bins = 1;
-    float radius_min = 0.00008f; // 稍微調大一點
+    float radius_min = 0.00008f; 
     int max_buffer_size = r_bins * theta_bins * phi_bins;
 
     Point_rgb* d_logPolarBuffer;
@@ -290,16 +283,16 @@ int main(int argc, char** argv) {
     // 相機設定
     float distance = 2.5f; 
 
-    // === 開始迴圈：每一幀讀新檔 + 轉視角 ===
+    // 每一幀讀新檔+轉視角
     for (int i = 0; i < total_frames; i++) {
         
-        // 1. 組合檔名 (動態讀取序列)
+        
         char inputFilename[128];
         sprintf(inputFilename, "%s%d.ply", filePrefix, startFrame + i);
         
-        // 2. 讀取點雲 (這步會花時間，是 I/O 瓶頸，但在 Demo 中沒關係)
+        // 讀取點雲
         printf("Loading Frame %d: %s...\n", i, inputFilename);
-        std::vector<Point> host_points = loadPLY(inputFilename); // 記得 loadPLY 要有正規化功能
+        std::vector<Point> host_points = loadPLY(inputFilename); 
         int numPoints = host_points.size();
         
         if (numPoints == 0) {
@@ -307,11 +300,11 @@ int main(int argc, char** argv) {
             continue;
         }
 
-        // 3. 複製到 GPU (因為每一幀點雲不同，必須重傳)
+        
         cudaMemcpy(d_points, host_points.data(), numPoints * sizeof(Point), cudaMemcpyHostToDevice);
         int numBlocks = (numPoints + blockSize - 1) / blockSize;
 
-        // 4. 計算旋轉角度
+        // 計算旋轉角度
         float angle = (float)i * (2.0f * M_PI / (float)total_frames);
         
         Gaze current_gaze;
@@ -331,7 +324,7 @@ int main(int argc, char** argv) {
         crossProduct({current_gaze.direction.x, current_gaze.direction.y, current_gaze.direction.z}, {0,1,0}, rightVec);
         crossProduct(rightVec, {current_gaze.direction.x, current_gaze.direction.y, current_gaze.direction.z}, upVec);
 
-        // 5. 執行 HPR Kernel
+        // 執行HPR Kernel
         setlogPolar<<<bufferBlocks, blockSize>>>(max_buffer_size, d_logPolarBuffer);
         logPolarTransformKernel<<<numBlocks, blockSize>>>(d_points, numPoints, radius_min, r_bins, theta_bins, phi_bins, d_logPolarBuffer, current_gaze, rightVec, upVec, rate_adapt);
         cudaDeviceSynchronize();
@@ -340,10 +333,10 @@ int main(int argc, char** argv) {
         logPolarToCartesianKernel<<<bufferBlocks, blockSize>>>(d_logPolarBuffer, r_bins, theta_bins, phi_bins, d_save_points, max_buffer_size, radius_min, current_gaze, rightVec, upVec, rate_adapt);
         cudaDeviceSynchronize();
 
-        // 6. 取回結果
+        // 取回結果
         cudaMemcpy(result_points.data(), d_save_points, max_buffer_size * sizeof(Point), cudaMemcpyDeviceToHost);
 
-        // 7. 計算與報告 (HPR 效率)
+        // 計算HPR
         int visible_count = 0;
         for(const auto& p : result_points) {
             if(p.count > 0) visible_count++;
@@ -352,7 +345,7 @@ int main(int argc, char** argv) {
         float saving = 100.0f * (1.0f - (float)visible_count / (float)numPoints);
         printf("  [Report] Original: %d -> HPR: %d | Saving: %.2f%%\n", numPoints, visible_count, saving);
 
-        // 8. 存檔 (這裡就不需要塗紅色灰色了，因為沒有 Delta)
+        // 存檔
         char outputFilename[64];
         sprintf(outputFilename, "output/result_first_%02d.ply", i);
         savePLY(outputFilename, result_points);
