@@ -111,7 +111,7 @@ python diffrential_sequence.py <file1.ply> <file2.ply> [OPTIONS]
 # Basic comparison
 ./theia_standard longdress_vox10_1051.ply output1051.ply
 ./theia_standard longdress_vox10_1052.ply output1052.ply
-python diffrential_sequence.py output1051.ply output1051.ply
+python diffrential_sequence.py output1051.ply output1052.ply
 
 # Custom threshold and output
 python diffrential_sequence.py frame1.ply frame2.ply -o diff.ply -t 0.005
