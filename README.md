@@ -1,7 +1,6 @@
 # 3DCV-Final-Project-2025
-Implementation of occlusion-aware volumetric video streaming using **Log-Polar transformation** and **Implicit HPR** (raw CUDA kernels).
 
-# Theia: Occlusion-Aware Volumetric Video Streaming for Mixed Reality
+# Occlusion-Aware Volumetric Video Streaming for Mixed Reality
 
 A comprehensive pipeline for bandwidth-efficient volumetric video streaming on Mixed Reality headsets, implementing gaze-contingent foveated rendering with elliptical log-polar transformation and differential frame streaming.
 
